@@ -8,8 +8,9 @@ from .config import get_settings
 class ChatGPTClient:
     def __init__(self) -> None:
         settings = get_settings()
-        self._client = OpenAI(api_key=settings.openai_api_key, timeout=settings.request_timeout)
+        self._client = OpenAI(api_key=settings.openai_api_key)
         self._model = settings.openai_model
+        self._request_timeout = settings.request_timeout
 
     def translate(self, text: str, source_language: str, target_language: str) -> str:
         prompt = (
@@ -33,9 +34,18 @@ class ChatGPTClient:
                 {"role": "user", "content": user_text},
             ],
             temperature=0.3,
+            timeout=self._request_timeout,
         )
         message = response.choices[0].message
-        content = message.content if message and message.content else ""
+        content = ""
+        if message and message.content:
+            if isinstance(message.content, list):
+                content = "".join(
+                    part.get("text", "") if isinstance(part, dict) else str(part)
+                    for part in message.content
+                )
+            else:
+                content = message.content
         return content.strip()
 
 

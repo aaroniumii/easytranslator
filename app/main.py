@@ -46,8 +46,8 @@ async def read_root() -> str:
 
 @app.post("/api/translate", response_model=TranslateResponse)
 async def translate(request: TranslateRequest) -> TranslateResponse:
-    client = get_client()
     try:
+        client = get_client()
         translated = client.translate(request.text, request.source_language, request.target_language)
     except Exception as exc:  # pragma: no cover - passthrough to HTTP error
         raise HTTPException(status_code=500, detail=str(exc)) from exc
@@ -56,8 +56,8 @@ async def translate(request: TranslateRequest) -> TranslateResponse:
 
 @app.post("/api/correct", response_model=CorrectionResponse)
 async def correct(request: CorrectionRequest) -> CorrectionResponse:
-    client = get_client()
     try:
+        client = get_client()
         corrected = client.correct(request.text, request.language)
     except Exception as exc:  # pragma: no cover - passthrough to HTTP error
         raise HTTPException(status_code=500, detail=str(exc)) from exc
