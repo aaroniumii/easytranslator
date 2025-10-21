@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Easy Translator</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f2f4f8;
+      }
+
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem 1rem 4rem;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      section {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border: 1px solid #d0d7de;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+
+      button {
+        background-color: #2563eb;
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: progress;
+      }
+
+      .result {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        min-height: 4rem;
+      }
+
+      .error {
+        color: #b91c1c;
+        font-weight: 600;
+      }
+
+      footer {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Easy Translator</h1>
+
+      <section>
+        <h2>Traductor</h2>
+        <form id="translate-form">
+          <label for="source-language">Idioma original</label>
+          <input id="source-language" name="sourceLanguage" placeholder="Ej. Español" required />
+
+          <label for="target-language">Idioma destino</label>
+          <input id="target-language" name="targetLanguage" placeholder="Ej. Inglés" required />
+
+          <label for="text-to-translate">Texto</label>
+          <textarea
+            id="text-to-translate"
+            name="text"
+            rows="5"
+            placeholder="Escribe el texto que quieres traducir"
+            required
+          ></textarea>
+
+          <button type="submit">Traducir</button>
+        </form>
+        <p class="error" id="translate-error"></p>
+        <div class="result" id="translate-result"></div>
+      </section>
+
+      <section>
+        <h2>Corrección</h2>
+        <form id="correction-form">
+          <label for="correction-language">Idioma del texto</label>
+          <input id="correction-language" name="language" placeholder="Ej. Español" required />
+
+          <label for="text-to-correct">Texto</label>
+          <textarea
+            id="text-to-correct"
+            name="text"
+            rows="5"
+            placeholder="Escribe el texto que quieres corregir"
+            required
+          ></textarea>
+
+          <button type="submit">Corregir</button>
+        </form>
+        <p class="error" id="correction-error"></p>
+        <div class="result" id="correction-result"></div>
+      </section>
+
+      <footer>Funciona con la API de ChatGPT</footer>
+    </main>
+
+    <script>
+      async function handleFormSubmit(event, endpoint, resultId, errorId) {
+        event.preventDefault();
+        const form = event.target;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const resultElement = document.getElementById(resultId);
+        const errorElement = document.getElementById(errorId);
+
+        submitButton.disabled = true;
+        errorElement.textContent = '';
+        resultElement.textContent = 'Procesando...';
+
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Error inesperado');
+          }
+
+          const data = await response.json();
+          const [value] = Object.values(data);
+          resultElement.textContent = value;
+        } catch (error) {
+          errorElement.textContent = error.message;
+          resultElement.textContent = '';
+        } finally {
+          submitButton.disabled = false;
+        }
+      }
+
+      document
+        .getElementById('translate-form')
+        .addEventListener('submit', (event) =>
+          handleFormSubmit(event, '/api/translate', 'translate-result', 'translate-error'),
+        );
+
+      document
+        .getElementById('correction-form')
+        .addEventListener('submit', (event) =>
+          handleFormSubmit(event, '/api/correct', 'correction-result', 'correction-error'),
+        );
+    </script>
+  </body>
+</html>
