@@ -1,11 +1,11 @@
 # Easy Translator
 
-Aplicación web sencilla que utiliza la API de ChatGPT para traducir textos entre idiomas y corregir gramática, ortografía y lógica dentro de un mismo idioma.
+Aplicación web sencilla que utiliza un proveedor de modelos (OpenAI o Gemini) para traducir textos entre idiomas y corregir gramática, ortografía y lógica dentro de un mismo idioma.
 
 ## Requisitos
 
 - Python 3.11+
-- Una clave válida de la API de OpenAI (ChatGPT)
+- Una clave válida de la API del proveedor que desees usar (OpenAI o Gemini)
 
 ## Configuración
 
@@ -15,7 +15,10 @@ Aplicación web sencilla que utiliza la API de ChatGPT para traducir textos entr
 cp .env.example .env
 ```
 
-2. Edita `.env` e introduce tu `OPENAI_API_KEY`. Opcionalmente, puedes modificar el modelo (`OPENAI_MODEL`) o el tiempo máximo de espera (`OPENAI_TIMEOUT`).
+2. Edita `.env` e introduce tus credenciales:
+   - Define `LLM_PROVIDER` con el valor `openai` o `gemini`.
+   - Si utilizas OpenAI, especifica `OPENAI_API_KEY` y, opcionalmente, el modelo (`OPENAI_MODEL`) y el tiempo máximo de espera (`OPENAI_TIMEOUT`).
+   - Si utilizas Gemini, especifica `GEMINI_API_KEY`. Opcionalmente, puedes ajustar el modelo (`GEMINI_MODEL`) o desactivar el pensamiento con `GEMINI_DISABLE_THINKING=true`.
 
 ## Ejecución local
 
