@@ -97,10 +97,10 @@
         <h2>Traductor</h2>
         <form id="translate-form">
           <label for="source-language">Idioma original</label>
-          <input id="source-language" name="sourceLanguage" placeholder="Ej. Español" required />
+          <input id="source-language" name="source_language" placeholder="Ej. Español" required />
 
           <label for="target-language">Idioma destino</label>
-          <input id="target-language" name="targetLanguage" placeholder="Ej. Inglés" required />
+          <input id="target-language" name="target_language" placeholder="Ej. Inglés" required />
 
           <label for="text-to-translate">Texto</label>
           <textarea
@@ -165,7 +165,11 @@
 
           if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.detail || 'Error inesperado');
+            const detail = errorData.detail;
+            const message = Array.isArray(detail)
+              ? detail.map((item) => item.msg || JSON.stringify(item)).join('. ')
+              : detail || 'Error inesperado';
+            throw new Error(message);
           }
 
           const data = await response.json();
