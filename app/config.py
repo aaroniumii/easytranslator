@@ -1,7 +1,8 @@
 from functools import lru_cache
 from typing import Literal, Optional
 
-from pydantic import BaseSettings, Field, root_validator
+from pydantic import Field, model_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -15,15 +16,16 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = False
+        env_file = ".env"
 
-    @root_validator
-    def _validate_provider_configuration(cls, values: dict) -> dict:
-        provider = values.get("llm_provider")
-        if provider == "openai" and not values.get("openai_api_key"):
+    @model_validator(mode="after")
+    def _validate_provider_configuration(self) -> "Settings":
+        provider = self.llm_provider
+        if provider == "openai" and not self.openai_api_key:
             raise ValueError("OPENAI_API_KEY must be set when LLM_PROVIDER is 'openai'.")
-        if provider == "gemini" and not values.get("gemini_api_key"):
+        if provider == "gemini" and not self.gemini_api_key:
             raise ValueError("GEMINI_API_KEY must be set when LLM_PROVIDER is 'gemini'.")
-        return values
+        return self
 
 
 @lru_cache()
